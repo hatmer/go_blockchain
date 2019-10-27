@@ -1,6 +1,6 @@
 # Green Blockchain
 
-Eco-friendly blockchain with strong data verification guarantees. Relies on trust for security not PoW.
+Eco-friendly centralized blockchain with strong data verification guarantees. 
 
 ## Design Goals
 * Simple and elegant solution
