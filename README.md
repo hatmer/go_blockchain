@@ -4,7 +4,7 @@
 Simple blockchain implementation to learn Go. 
 
 ## What it does
-* Logs url requests to webserver in a PoW-secured blockchain.
+* Logs url of requests to webserver as a PoW-secured blockchain on disk.
 
 ## Design Goals
 * Simple and elegant solution.
