@@ -13,11 +13,11 @@ import (
 	"time"
 )
 
-const BLOCK_SIZE = 4 //1024
-const BUFFER_SIZE = 4096
-const PORT = 8080
-const DATA_FILE = "blockchain.dat"
-const DIFFICULTY = 2
+const blockSize = 4 //1024
+const bufferSize = 4096
+const port = 8080
+const dataFile = "blockchain.dat"
+const difficulty = 2
 
 var blockNumber = 0
 
@@ -40,7 +40,7 @@ type dataPasser struct {
  */
 func (b *block) write() error {
 	/* open output file */
-	f, err := os.OpenFile(DATA_FILE, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	f, err := os.OpenFile(dataFile, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
 		return errors.New("could not open output file\n")
 	}
@@ -86,12 +86,12 @@ func sha(x []byte) []byte {
 func pow(x string) (string, error) {
 	trial := ""
 	num := 0
-	target := strings.Repeat("0", DIFFICULTY)
+	target := strings.Repeat("0", difficulty)
 	for found := false; !found; {
 		trial = string(sha([]byte(string(num) + x)))
 		num += 1
 
-		if string([]rune(trial)[0:DIFFICULTY]) == target {
+		if string([]rune(trial)[0:difficulty]) == target {
 			found = true
 			log.Printf("number of hash iterations: %d\n", num)
 			log.Printf("found block hash: %x\n", string(trial))
@@ -108,21 +108,21 @@ func pow(x string) (string, error) {
 /*
  * Algorithm:
  *
- * put_index = 0
- * get_index = 0
+ * putIndex = 0
+ * getIndex = 0
  *
- * len_this_round = block_size
- * while len_this_round > 1:
- *   while put_index < (len_this_round / 2):
- *     slice[put_index] = sha(slice[get_index] + slice[get_index+1])
- *     put_index += 1
- *     get_index += 2
- *   len_this_round /= 2
+ * lenThisRound = blockSize
+ * while lenThisRound > 1:
+ *   while putIndex < (lenThisRound / 2):
+ *     slice[putIndex] = sha(slice[getIndex] + slice[getIndex+1])
+ *     putIndex += 1
+ *     getIndex += 2
+ *   lenThisRound /= 2
  *
  */
 
 func getMerkleRoot(entries []entry) (string, error) {
-	if len(entries) != BLOCK_SIZE {
+	if len(entries) != blockSize {
 		return "", errors.New("incorrect block size\n")
 	}
 
@@ -134,14 +134,14 @@ func getMerkleRoot(entries []entry) (string, error) {
 	}
 
 	// calculate Merkle Root in place
-	get_index := 0
-	for len_this_round := BLOCK_SIZE; len_this_round > 1; len_this_round /= 2 {
-		get_index = 0
-		for put_index := 0; put_index < (len_this_round / 2); put_index += 1 {
-			to_hash := append([]byte(entries[get_index]), []byte(entries[get_index+1])...)
-			hashes[put_index] = sha(to_hash)
-			get_index += 2
-			fmt.Printf("%d\n", get_index)
+	getIndex := 0
+	for lenThisRound := blockSize; lenThisRound > 1; lenThisRound /= 2 {
+		getIndex = 0
+		for putIndex := 0; putIndex < (lenThisRound / 2); putIndex += 1 {
+			toHash := append([]byte(entries[getIndex]), []byte(entries[getIndex+1])...)
+			hashes[putIndex] = sha(toHash)
+			getIndex += 2
+			fmt.Printf("%d\n", getIndex)
 		}
 	}
 	return string(hashes[0]), nil
@@ -151,9 +151,9 @@ func getMerkleRoot(entries []entry) (string, error) {
  * generates block
  */
 func generate(ch chan entry, hashPrev string) {
-	entries := make([]entry, 0, BLOCK_SIZE)
+	entries := make([]entry, 0, blockSize)
 	log.Printf("Starting new block. Block number: %d\n", blockNumber)
-	for i := 0; i < BLOCK_SIZE; i += 1 {
+	for i := 0; i < blockSize; i += 1 {
 		val := <-ch
 		entries = append(entries, val)
 	}
@@ -193,19 +193,19 @@ func main() {
 	seed := string(sha([]byte("seed")))
 
 	/* create output file */
-	/*f, err := os.Create(DATA_FILE)
+	/*f, err := os.Create(dataFile)
 	if err != nil {
 		panic(err)
 	}
 	f.Close()*/
 
 	/* run block builder goroutine */
-	ch := make(chan entry, BUFFER_SIZE)
+	ch := make(chan entry, bufferSize)
 	go generate(ch, seed)
 
 	/* run server */
 	p := dataPasser{ch}
 	http.HandleFunc("/", p.handler)
-	port := ":" + strconv.Itoa(PORT)
+	port := ":" + strconv.Itoa(port)
 	log.Fatal(http.ListenAndServe(port, nil))
 }
