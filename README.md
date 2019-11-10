@@ -1,9 +1,9 @@
 # Go Blockchain
 
-Simple blockchain implementation for learning Go. 
+Simple blockchain implementation to learn Go. 
 
 ## What it does
-* Logs url requests to the server to a PoW-secured blockchain.
+* Logs url requests to webserver in a PoW-secured blockchain.
 
 ## Design Goals
 * Simple and elegant solution.
