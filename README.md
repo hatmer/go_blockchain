@@ -1,7 +1,7 @@
 # Go Blockchain
 ![goreportcard](https://goreportcard.com/badge/github.com/hatmer/go_blockchain)
 
-Simple blockchain implementation to learn Go. 
+Simple blockchain implementation in Go. 
 
 ## What it does
 * Logs url of requests to webserver as a PoW-secured blockchain on disk.
